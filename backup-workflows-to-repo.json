@@ -1,0 +1,176 @@
+{
+  "updatedAt": "2026-03-28T07:10:41.908Z",
+  "createdAt": "2026-03-26T18:29:57.199Z",
+  "id": "wuip8oS6WzVDIEQk",
+  "name": "Backup Workflows to Repo",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "e0f0859e-7f42-4064-a351-a1e59879519b",
+      "name": "Schedule Trigger2",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        6128,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "id": "1a15ffb8-c3fa-475b-9371-6d1de0e6988d",
+      "name": "Get All Workflows2",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        6352,
+        1216
+      ],
+      "credentials": {
+        "n8nApi": {
+          "id": "JoYXcDwhyPufHm6f",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5e88327a-eeac-48e1-aea0-e384351cc404",
+      "name": "Loop Over Workflows1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        6576,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  const fileName = item.json.name ? item.json.name.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '') + '.json' : 'backup.json';\n  const jsonString = JSON.stringify(item.json, null, 2);\n  item.binary = {\n    data: {\n      data: Buffer.from(jsonString).toString('base64'),\n      mimeType: 'application/json',\n      fileName: fileName\n    }\n  };\n}\nreturn $input.all();"
+      },
+      "id": "dea21c39-96f4-448b-8d60-1d6b0a0c04c3",
+      "name": "Convert to File2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6800,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/path/to/your/durable-n8n/backups/{{ $binary.data.fileName }}",
+        "options": {}
+      },
+      "id": "02c6197b-7b35-4c9e-b8c7-c10aff83b54e",
+      "name": "Write File to Disk2",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        7008,
+        1216
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Workflows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Workflows1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Write File to Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write File to Disk2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Workflows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "977581c5-fc01-4089-be1c-707806e5f536",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-26T18:29:57.206Z",
+      "createdAt": "2026-03-26T18:29:57.206Z",
+      "role": "workflow:owner",
+      "workflowId": "wuip8oS6WzVDIEQk",
+      "projectId": "vlLmmVjUFO4NMq0v"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2026-03-26T18:18:55.963Z",
+      "createdAt": "2026-03-26T18:18:55.963Z",
+      "id": "5E87Ho7BWKJpsWD8",
+      "name": "maintenance"
+    }
+  ]
+}
